@@ -1,16 +1,16 @@
 buildscript {
-	repositories {
-		jcenter()
-		maven { url = "http://files.minecraftforge.net/maven" }
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
-	}
-	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-		classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-		classpath "gradle.plugin.net.minecrell:licenser:0.3"
-	}
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+        maven {
+            url = "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+        classpath "gradle.plugin.net.minecrell:licenser:0.3"
+    }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -18,58 +18,58 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'net.minecrell.licenser'
 
 version = "0.9.9.1-1.12.2"
-group= "pl.asie.foamfix" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "pl.asie.foamfix" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "foamfix"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 minecraft {
-    version = "1.12.2-14.23.3.2673"
+    version = "1.12.2-14.23.3.2702"
     runDir = "run"
-    
-    mappings = "snapshot_20180423"
+
+    mappings = "snapshot_20180524"
     makeObfSourceJar = false
 
     replace '@VERSION@', project.version
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 license {
-	sourceSets = [project.sourceSets.main]
-	header = project.file("docs/licenses/COPYING")
-	ignoreFailures = true
-	exclude '**/*.lang'
-	exclude '**/*.info'
-	exclude '**/*.mcmeta'
+    sourceSets = [project.sourceSets.main]
+    header = project.file("docs/licenses/COPYING")
+    ignoreFailures = true
+    exclude '**/*.lang'
+    exclude '**/*.info'
+    exclude '**/*.mcmeta'
 
-	matching('**/pl/asie/foamfix/api/**') {
-		header = project.file("docs/licenses/LICENSE-API")
-	}
+    matching('**/pl/asie/foamfix/api/**') {
+        header = project.file("docs/licenses/LICENSE-API")
+    }
 
-	matching('**/pl/asie/foamfix/common/WorldNuller.java') {
-		header = project.file("docs/licenses/LICENSE-neptunepink")
-	}
+    matching('**/pl/asie/foamfix/common/WorldNuller.java') {
+        header = project.file("docs/licenses/LICENSE-neptunepink")
+    }
 }
 
 configurations {
-	shadow
-	compile.extendsFrom shadow
+    shadow
+    compile.extendsFrom shadow
 }
 
 repositories {
-	maven {
-		name 'DVS1 Maven FS'
-		url 'http://dvs1.progwml6.com/files/maven'
-	}
+    maven {
+        name = 'DVS1 Maven FS'
+        url = 'http://dvs1.progwml6.com/files/maven'
+    }
 }
 
 dependencies {
-	deobfCompile "mezz.jei:jei_1.12.2:4.8.5.147"
-	compile "org.openjdk.jmh:jmh-generator-annprocess:1.20"
+    deobfCompile "mezz.jei:jei_1.12.2:4.9.1.191"
+    compile "org.openjdk.jmh:jmh-generator-annprocess:1.20"
 }
 
 processResources {
@@ -80,12 +80,12 @@ processResources {
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
+
         // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'version': project.version, 'mcversion': project.minecraft.version
     }
-        
-    // copy everything else, thats not the mcmod.info
+
+    // copy everything else, that's not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
@@ -100,7 +100,7 @@ shadowJar {
 }
 
 reobfJar {
-	setJar(tasks.shadowJar.archivePath)
+    setJar(tasks.shadowJar.archivePath)
 }
 reobfJar.dependsOn shadowJar
 
@@ -137,31 +137,4 @@ reobf {
 }
 
 assemble.dependsOn(anarchyJar, lawfulJar)
-
-task signLawfulJar(type: SignJar, dependsOn: lawfulJar) {
-    onlyIf {
-        project.hasProperty('keyStore')
-    }
-
-    keyStore = project.keyStore
-    alias = project.keyStoreAlias
-    storePass = project.keyStorePass
-    keyPass = project.keyStoreKeyPass
-    inputFile = lawfulJar.archivePath
-    outputFile = lawfulJar.archivePath
-}
-
-task signAnarchyJar(type: SignJar, dependsOn: anarchyJar) {
-    onlyIf {
-        project.hasProperty('keyStore')
-    }
-
-    keyStore = project.keyStore
-    alias = project.keyStoreAlias
-    storePass = project.keyStorePass
-    keyPass = project.keyStoreKeyPass
-    inputFile = anarchyJar.archivePath
-    outputFile = anarchyJar.archivePath
-}
-
-build.dependsOn(signLawfulJar, signAnarchyJar)
+build.dependsOn(lawfulJar, anarchyJar)
